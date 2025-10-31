@@ -32,17 +32,17 @@ export default function AddLiquidity() {
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-bold text-white">Add Liquidity</h2>
+      <h2 className="mb-4 text-xl font-bold text-white sm:mb-6 sm:text-2xl">Add Liquidity</h2>
 
-      <div className="mb-6 rounded-lg bg-slate-700/50 p-4">
-        <p className="text-sm text-slate-300">
+      <div className="mb-4 rounded-lg bg-slate-700/50 p-3 sm:mb-6 sm:p-4">
+        <p className="text-xs text-slate-300 sm:text-sm">
           Provide liquidity to earn trading fees. You will receive LP tokens representing your share of the pool.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             Token A Amount
           </label>
           <input
@@ -52,13 +52,13 @@ export default function AddLiquidity() {
             placeholder="0.00"
             step="0.01"
             min="0"
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
             required
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             Token B Amount
           </label>
           <input
@@ -68,15 +68,15 @@ export default function AddLiquidity() {
             placeholder="0.00"
             step="0.01"
             min="0"
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
             required
           />
         </div>
 
         {tokenAAmount && tokenBAmount && (
-          <div className="rounded-lg bg-slate-700/50 p-4">
-            <p className="text-sm text-slate-400">Estimated LP Tokens</p>
-            <p className="text-2xl font-bold text-white">
+          <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+            <p className="text-xs text-slate-400 sm:text-sm">Estimated LP Tokens</p>
+            <p className="text-xl font-bold text-white sm:text-2xl">
               {((parseFloat(tokenAAmount) * parseFloat(tokenBAmount)) ** 0.5).toFixed(4)}
             </p>
           </div>
@@ -84,7 +84,7 @@ export default function AddLiquidity() {
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-green-600 py-3 font-medium text-white transition-colors hover:bg-green-700"
+          className="w-full rounded-lg bg-green-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-700 sm:py-3 sm:text-base"
         >
           Add Liquidity
         </button>

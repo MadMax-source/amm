@@ -28,85 +28,85 @@ export default function PoolInfo() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Pool Information</h2>
+      <div className="mb-4 flex items-center justify-between gap-2 sm:mb-6">
+        <h2 className="text-xl font-bold text-white sm:text-2xl">Pool Information</h2>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 sm:px-4 sm:py-2 sm:text-sm"
         >
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-lg bg-slate-700/50 p-4">
-          <p className="mb-2 text-sm text-slate-400">Pool Public Key</p>
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+          <p className="mb-2 text-xs text-slate-400 sm:text-sm">Pool Public Key</p>
           <div className="flex items-center justify-between gap-2">
-            <p className="font-mono text-sm text-white">{poolData.publicKey}</p>
+            <p className="break-all font-mono text-xs text-white sm:text-sm">{poolData.publicKey}</p>
             <a
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-400 hover:text-blue-300"
+              className="shrink-0 text-xs text-blue-400 hover:text-blue-300 sm:text-sm"
             >
               View
             </a>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg bg-slate-700/50 p-4">
-            <p className="mb-2 text-sm text-slate-400">Token A Mint</p>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+            <p className="mb-2 text-xs text-slate-400 sm:text-sm">Token A Mint</p>
             <p className="truncate font-mono text-xs text-white">{poolData.tokenAMint}</p>
           </div>
 
-          <div className="rounded-lg bg-slate-700/50 p-4">
-            <p className="mb-2 text-sm text-slate-400">Token B Mint</p>
+          <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+            <p className="mb-2 text-xs text-slate-400 sm:text-sm">Token B Mint</p>
             <p className="truncate font-mono text-xs text-white">{poolData.tokenBMint}</p>
           </div>
         </div>
 
-        <div className="rounded-lg bg-slate-700/50 p-4">
-          <p className="mb-4 text-sm font-medium text-slate-300">Current Reserves</p>
-          <div className="space-y-3">
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+          <p className="mb-3 text-xs font-medium text-slate-300 sm:mb-4 sm:text-sm">Current Reserves</p>
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Token A</span>
-              <span className="text-xl font-bold text-white">{poolData.reserveA.toFixed(2)}</span>
+              <span className="text-xs text-slate-400 sm:text-sm">Token A</span>
+              <span className="text-lg font-bold text-white sm:text-xl">{poolData.reserveA.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Token B</span>
-              <span className="text-xl font-bold text-white">{poolData.reserveB.toFixed(2)}</span>
+              <span className="text-xs text-slate-400 sm:text-sm">Token B</span>
+              <span className="text-lg font-bold text-white sm:text-xl">{poolData.reserveB.toFixed(2)}</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg bg-slate-700/50 p-4">
-            <p className="mb-2 text-sm text-slate-400">LP Supply</p>
-            <p className="text-xl font-bold text-white">{poolData.lpSupply.toFixed(4)}</p>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+            <p className="mb-2 text-xs text-slate-400 sm:text-sm">LP Supply</p>
+            <p className="text-lg font-bold text-white sm:text-xl">{poolData.lpSupply.toFixed(4)}</p>
           </div>
 
-          <div className="rounded-lg bg-slate-700/50 p-4">
-            <p className="mb-2 text-sm text-slate-400">Fee</p>
-            <p className="text-xl font-bold text-white">{poolData.fee}%</p>
+          <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+            <p className="mb-2 text-xs text-slate-400 sm:text-sm">Fee</p>
+            <p className="text-lg font-bold text-white sm:text-xl">{poolData.fee}%</p>
           </div>
         </div>
 
-        <div className="rounded-lg bg-slate-700/50 p-4">
-          <p className="mb-2 text-sm text-slate-400">Current Price</p>
-          <p className="text-xl font-bold text-white">
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+          <p className="mb-2 text-xs text-slate-400 sm:text-sm">Current Price</p>
+          <p className="break-words text-base font-bold text-white sm:text-xl">
             1 Token A = {poolData.price.toFixed(6)} Token B
           </p>
         </div>
 
-        <div className="rounded-lg bg-slate-700/50 p-4">
-          <p className="mb-2 text-sm text-slate-400">Allowed Swapper</p>
-          <p className="truncate font-mono text-sm text-white">{poolData.allowedSwapper}</p>
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+          <p className="mb-2 text-xs text-slate-400 sm:text-sm">Allowed Swapper</p>
+          <p className="truncate font-mono text-xs text-white sm:text-sm">{poolData.allowedSwapper}</p>
         </div>
 
-        <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
-          <p className="text-sm text-blue-300">
+        <div className="rounded-lg border border-blue-500/30 bg-blue-500/10 p-3 sm:p-4">
+          <p className="text-xs text-blue-300 sm:text-sm">
             This pool information is fetched from the Solana blockchain. Click refresh to update the data.
           </p>
         </div>

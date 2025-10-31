@@ -38,11 +38,11 @@ export default function CreatePool() {
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-bold text-white">Create New Pool</h2>
+      <h2 className="mb-4 text-xl font-bold text-white sm:mb-6 sm:text-2xl">Create New Pool</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             Token A Mint Address
           </label>
           <input
@@ -50,13 +50,13 @@ export default function CreatePool() {
             value={tokenAMint}
             onChange={(e) => setTokenAMint(e.target.value)}
             placeholder="Enter Token A mint address"
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
             required
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             Token B Mint Address
           </label>
           <input
@@ -64,14 +64,14 @@ export default function CreatePool() {
             value={tokenBMint}
             onChange={(e) => setTokenBMint(e.target.value)}
             placeholder="Enter Token B mint address"
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
             required
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
               Token A Amount
             </label>
             <input
@@ -81,13 +81,13 @@ export default function CreatePool() {
               placeholder="0.00"
               step="0.01"
               min="0"
-              className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
               required
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
+            <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
               Token B Amount
             </label>
             <input
@@ -97,14 +97,14 @@ export default function CreatePool() {
               placeholder="0.00"
               step="0.01"
               min="0"
-              className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
               required
             />
           </div>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             Fee (basis points)
           </label>
           <input
@@ -114,7 +114,7 @@ export default function CreatePool() {
             placeholder="30"
             min="0"
             max="10000"
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
             required
           />
           <p className="mt-1 text-xs text-slate-400">
@@ -123,7 +123,7 @@ export default function CreatePool() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             Allowed Swapper Address
           </label>
           <input
@@ -131,14 +131,14 @@ export default function CreatePool() {
             value={allowedSwapper}
             onChange={(e) => setAllowedSwapper(e.target.value)}
             placeholder="Enter allowed swapper public key"
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
             required
           />
         </div>
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-blue-600 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+          className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 sm:py-3 sm:text-base"
         >
           Create Pool
         </button>

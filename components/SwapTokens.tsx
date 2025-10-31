@@ -76,13 +76,13 @@ export default function SwapTokens() {
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-bold text-white">Swap Tokens</h2>
+      <h2 className="mb-4 text-xl font-bold text-white sm:mb-6 sm:text-2xl">Swap Tokens</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="rounded-lg bg-slate-700/50 p-4">
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
           <div className="mb-3 flex items-center justify-between">
-            <label className="text-sm font-medium text-slate-300">From</label>
-            <span className="text-sm text-slate-400">
+            <label className="text-xs font-medium text-slate-300 sm:text-sm">From</label>
+            <span className="text-xs text-slate-400 sm:text-sm">
               {direction === 'AtoB' ? 'Token A' : 'Token B'}
             </span>
           </div>
@@ -93,7 +93,7 @@ export default function SwapTokens() {
             placeholder="0.00"
             step="0.01"
             min="0"
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
             required
           />
         </div>
@@ -102,10 +102,10 @@ export default function SwapTokens() {
           <button
             type="button"
             onClick={handleSwapDirection}
-            className="rounded-full bg-slate-700 p-2 transition-transform hover:scale-110 hover:bg-slate-600"
+            className="rounded-full bg-slate-700 p-1.5 transition-transform hover:scale-110 hover:bg-slate-600 sm:p-2"
           >
             <svg
-              className="h-6 w-6 text-white"
+              className="h-5 w-5 text-white sm:h-6 sm:w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -120,10 +120,10 @@ export default function SwapTokens() {
           </button>
         </div>
 
-        <div className="rounded-lg bg-slate-700/50 p-4">
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
           <div className="mb-3 flex items-center justify-between">
-            <label className="text-sm font-medium text-slate-300">To (estimated)</label>
-            <span className="text-sm text-slate-400">
+            <label className="text-xs font-medium text-slate-300 sm:text-sm">To (estimated)</label>
+            <span className="text-xs text-slate-400 sm:text-sm">
               {direction === 'AtoB' ? 'Token B' : 'Token A'}
             </span>
           </div>
@@ -131,12 +131,12 @@ export default function SwapTokens() {
             type="text"
             value={estimatedOutput.toFixed(4)}
             readOnly
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white sm:px-4"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-300">
+          <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             Minimum Output (Slippage Protection)
           </label>
           <input
@@ -146,26 +146,26 @@ export default function SwapTokens() {
             placeholder="0.00"
             step="0.0001"
             min="0"
-            className="w-full rounded-lg bg-slate-700 px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
             required
           />
           <button
             type="button"
             onClick={() => setMinOutput((estimatedOutput * 0.99).toFixed(4))}
-            className="mt-2 text-sm text-blue-400 hover:text-blue-300"
+            className="mt-2 text-xs text-blue-400 hover:text-blue-300 sm:text-sm"
           >
             Set 1% slippage
           </button>
         </div>
 
-        <div className="rounded-lg bg-slate-700/50 p-4">
-          <div className="flex justify-between text-sm">
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+          <div className="flex justify-between text-xs sm:text-sm">
             <span className="text-slate-400">Current Price</span>
-            <span className="text-white">
+            <span className="break-all text-right text-white">
               1 {direction === 'AtoB' ? 'A' : 'B'} = {currentPrice.toFixed(6)} {direction === 'AtoB' ? 'B' : 'A'}
             </span>
           </div>
-          <div className="mt-2 flex justify-between text-sm">
+          <div className="mt-2 flex justify-between text-xs sm:text-sm">
             <span className="text-slate-400">Fee</span>
             <span className="text-white">{(fee * 100).toFixed(2)}%</span>
           </div>
@@ -173,7 +173,7 @@ export default function SwapTokens() {
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-blue-600 py-3 font-medium text-white transition-colors hover:bg-blue-700"
+          className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 sm:py-3 sm:text-base"
         >
           Swap
         </button>

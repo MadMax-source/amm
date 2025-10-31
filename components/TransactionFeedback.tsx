@@ -16,13 +16,13 @@ export default function TransactionFeedback({ transaction, onClose }: Transactio
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-slate-800 p-6 shadow-xl">
-        <div className="mb-4 flex items-start justify-between">
-          <div className="flex items-center gap-3">
+      <div className="w-full max-w-md rounded-lg bg-slate-800 p-4 shadow-xl sm:p-6">
+        <div className="mb-4 flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             {transaction.status === 'success' ? (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/20 sm:h-10 sm:w-10">
                 <svg
-                  className="h-6 w-6 text-green-500"
+                  className="h-5 w-5 text-green-500 sm:h-6 sm:w-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -36,9 +36,9 @@ export default function TransactionFeedback({ transaction, onClose }: Transactio
                 </svg>
               </div>
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-500/20 sm:h-10 sm:w-10">
                 <svg
-                  className="h-6 w-6 text-red-500"
+                  className="h-5 w-5 text-red-500 sm:h-6 sm:w-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -52,16 +52,16 @@ export default function TransactionFeedback({ transaction, onClose }: Transactio
                 </svg>
               </div>
             )}
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-base font-semibold text-white sm:text-lg">
               {transaction.status === 'success' ? 'Transaction Successful' : 'Transaction Failed'}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-300"
+            className="shrink-0 text-slate-400 hover:text-slate-300"
           >
             <svg
-              className="h-6 w-6"
+              className="h-5 w-5 sm:h-6 sm:w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -76,14 +76,14 @@ export default function TransactionFeedback({ transaction, onClose }: Transactio
           </button>
         </div>
 
-        <div className="mb-4 whitespace-pre-wrap rounded-lg bg-slate-700/50 p-4 text-sm text-slate-300">
+        <div className="mb-4 whitespace-pre-wrap rounded-lg bg-slate-700/50 p-3 text-xs text-slate-300 sm:p-4 sm:text-sm">
           {transaction.message}
         </div>
 
         {transaction.signature && (
           <div className="mb-4">
-            <p className="mb-2 text-sm text-slate-400">Transaction Signature</p>
-            <p className="truncate rounded-lg bg-slate-700/50 p-2 font-mono text-xs text-white">
+            <p className="mb-2 text-xs text-slate-400 sm:text-sm">Transaction Signature</p>
+            <p className="break-all rounded-lg bg-slate-700/50 p-2 font-mono text-xs text-white sm:truncate">
               {transaction.signature}
             </p>
           </div>
