@@ -7,11 +7,14 @@ import AddLiquidity from '@/components/AddLiquidity';
 import RemoveLiquidity from '@/components/RemoveLiquidity';
 import SwapTokens from '@/components/SwapTokens';
 import PoolInfo from '@/components/PoolInfo';
+import CustomConnectButton from '@/components/CustomConnectButton';
 
 export default function Home() {
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [allowedSwapper] = useState<string>('ALLOWED_SWAP_PUBKEY_HERE');
-  const [activeTab, setActiveTab] = useState<'create' | 'add' | 'remove' | 'swap' | 'info'>('create');
+  const [activeTab, setActiveTab] = useState<'create' | 'add' | 'remove' | 'swap' | 'info'>(
+    'create',
+  );
 
   const isAllowedSwapper = connectedWallet === allowedSwapper;
 
@@ -21,10 +24,12 @@ export default function Home() {
         <header className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-2xl font-bold text-white sm:text-3xl">Solana AMM</h1>
-            <WalletConnect
-              connectedWallet={connectedWallet}
-              onConnect={setConnectedWallet}
-            />
+            {/*
+            <WalletConnect connectedWallet={connectedWallet} onConnect={setConnectedWallet} />
+
+            */}
+
+            <CustomConnectButton connectedWallet={connectedWallet} onConnect={setConnectedWallet} />
           </div>
         </header>
 
@@ -36,9 +41,9 @@ export default function Home() {
                 Solana Automated Market Maker
               </h2>
               <p className="mb-8 text-base leading-relaxed text-slate-300 sm:text-lg">
-                A decentralized liquidity protocol built on Solana. Create liquidity pools,
-                provide liquidity to earn fees, swap tokens instantly, and participate in DeFi
-                with low transaction costs and fast settlement times.
+                A decentralized liquidity protocol built on Solana. Create liquidity pools, provide
+                liquidity to earn fees, swap tokens instantly, and participate in DeFi with low
+                transaction costs and fast settlement times.
               </p>
 
               <div className="mb-8 grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
@@ -52,9 +57,7 @@ export default function Home() {
                 <div className="rounded-lg bg-slate-800/50 p-4 backdrop-blur-sm">
                   <div className="mb-2 text-2xl">💰</div>
                   <h3 className="mb-1 font-semibold text-white">Add Liquidity</h3>
-                  <p className="text-sm text-slate-400">
-                    Provide liquidity and earn trading fees
-                  </p>
+                  <p className="text-sm text-slate-400">Provide liquidity and earn trading fees</p>
                 </div>
                 <div className="rounded-lg bg-slate-800/50 p-4 backdrop-blur-sm">
                   <div className="mb-2 text-2xl">🔄</div>
@@ -83,6 +86,16 @@ export default function Home() {
           <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3">
             <div className="lg:col-span-2">
               <div className="mb-6 flex gap-2 overflow-x-auto rounded-lg bg-slate-800/50 p-2">
+                <button
+                  onClick={() => setActiveTab('swap')}
+                  className={`whitespace-nowrap rounded-md px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
+                    activeTab === 'swap'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  Swap
+                </button>
                 <button
                   onClick={() => setActiveTab('create')}
                   className={`whitespace-nowrap rounded-md px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
@@ -113,16 +126,7 @@ export default function Home() {
                 >
                   Remove Liquidity
                 </button>
-                <button
-                  onClick={() => setActiveTab('swap')}
-                  className={`whitespace-nowrap rounded-md px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
-                    activeTab === 'swap'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-300 hover:bg-slate-700'
-                  }`}
-                >
-                  Swap
-                </button>
+
                 <button
                   onClick={() => setActiveTab('info')}
                   className={`whitespace-nowrap rounded-md px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm ${
@@ -136,17 +140,19 @@ export default function Home() {
               </div>
 
               <div className="rounded-lg bg-slate-800/50 p-4 backdrop-blur-sm sm:p-6">
+                {activeTab === 'swap' && <SwapTokens />}
                 {activeTab === 'create' && <CreatePool />}
                 {activeTab === 'add' && <AddLiquidity />}
                 {activeTab === 'remove' && <RemoveLiquidity />}
-                {activeTab === 'swap' && <SwapTokens />}
                 {activeTab === 'info' && <PoolInfo />}
               </div>
             </div>
 
             <div className="lg:col-span-1">
               <div className="rounded-lg bg-slate-800/50 p-4 backdrop-blur-sm sm:p-6 lg:sticky lg:top-8">
-                <h3 className="mb-4 text-base font-semibold text-white sm:text-lg">Wallet Status</h3>
+                <h3 className="mb-4 text-base font-semibold text-white sm:text-lg">
+                  Wallet Status
+                </h3>
                 <div className="space-y-3">
                   <div>
                     <p className="text-xs text-slate-400 sm:text-sm">Connected Wallet</p>
@@ -156,7 +162,11 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="text-xs text-slate-400 sm:text-sm">Swap Permission</p>
-                    <p className={`text-xs font-medium sm:text-sm ${isAllowedSwapper ? 'text-green-400' : 'text-yellow-400'}`}>
+                    <p
+                      className={`text-xs font-medium sm:text-sm ${
+                        isAllowedSwapper ? 'text-green-400' : 'text-yellow-400'
+                      }`}
+                    >
                       {isAllowedSwapper ? '✓ Authorized' : '⚠ Liquidity Only'}
                     </p>
                   </div>

@@ -11,7 +11,9 @@ export default function WalletConnect({ connectedWallet, onConnect }: WalletConn
   const [showWallets, setShowWallets] = useState(false);
 
   const handleConnect = (walletName: string) => {
-    const mockWallet = `${walletName.toUpperCase()}_MOCK_${Math.random().toString(36).substring(7)}`;
+    const mockWallet = `${walletName.toUpperCase()}_MOCK_${Math.random()
+      .toString(36)
+      .substring(7)}`;
     onConnect(mockWallet);
     setShowWallets(false);
   };

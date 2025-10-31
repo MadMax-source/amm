@@ -1,0 +1,113 @@
+Here’s a **concise summary** of what your investors want you to build for the **technical test assignment** 👇
+
+---
+
+## 🎯 **Goal**
+
+Build a **private AMM V2 pool on Solana Devnet** — like Uniswap V2 but **only one specific wallet** is allowed to make swaps.
+
+---
+
+## 🧩 **Core Requirements**
+
+### 1. **On-chain Program (Rust + Anchor)**
+
+Create a Solana smart contract that:
+
+* Implements a **constant-product AMM** (`x * y = k`).
+* Supports:
+
+  * **Create Pool**
+  * **Add Liquidity**
+  * **Remove Liquidity**
+  * **Swap Tokens**
+  * **Query Pool State (reserves, price, etc.)**
+* Restricts swaps so that **only a specific wallet (allowed_swap_pubkey)** can perform swaps.
+* Works with **two SPL tokens** (Token A and Token B).
+* Stores pool data: token mints, reserves, fee, allowed swapper, and LP token info.
+
+---
+
+### 2. **Client (CLI or Simple Web UI)**
+
+Create a minimal frontend or command-line client that can:
+
+* **Create a pool** (with chosen token mints and parameters)
+* **Add/remove liquidity**
+* **Swap tokens** (only works from the allowed wallet)
+* **Display pool info** — reserves, prices, etc.
+
+---
+
+### 3. **Deployment & Scripts**
+
+Provide deployment scripts that:
+
+* Build and deploy the Anchor program to **Devnet**.
+* Create and mint **test SPL tokens**.
+* Create the **pool**.
+* Fund the **allowed swapper wallet** with tokens.
+
+---
+
+### 4. **Automated Tests**
+
+Include:
+
+* **Rust unit tests** (for AMM logic).
+* **Integration tests** (JS/TS or Rust) that:
+
+  * Create a pool.
+  * Add liquidity.
+  * Successfully swap from the allowed wallet.
+  * Fail swaps from other wallets.
+  * Check constant-product math correctness and fees.
+
+---
+
+### 5. **Documentation**
+
+Provide a clear **README** with:
+
+* Setup and deployment steps.
+* Devnet RPC URL and keypair usage.
+* Test instructions.
+* Design explanation:
+
+  * How the swap restriction works.
+  * Pool data structure.
+  * Fee model and safety measures.
+
+---
+
+### 6. **Code Quality**
+
+* Clean GitHub repo with clear commits.
+* Well-commented and organized code.
+* Typed client code.
+* Optional: CI/Lint setup.
+
+---
+
+## ✅ **Functional Summary**
+
+| Function             | Access                  | Description                               |
+| -------------------- | ----------------------- | ----------------------------------------- |
+| Create Pool          | Anyone                  | Initializes AMM pool with parameters      |
+| Add/Remove Liquidity | Anyone                  | Deposit/withdraw tokens from pool         |
+| Swap                 | **Only allowed wallet** | Swap A ↔ B using constant-product formula |
+| Query                | Anyone                  | View reserves, price, etc.                |
+
+---
+
+### 🧠 **Technical Notes**
+
+* Use **Anchor framework** for simplicity.
+* Use **PDAs** for pool authority.
+* Implement **slippage checks** and **fee deduction**.
+* Use **safe math** (no overflow).
+* Deploy and test fully on **Solana Devnet** (no mainnet tokens).
+
+---
+
+Would you like me to give you a **step-by-step development plan** (with folder structure and commands) to start building this?
