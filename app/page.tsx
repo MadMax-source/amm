@@ -72,17 +72,13 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => setActiveTab('swap')}
-                  disabled={!isAllowedSwapper}
                   className={`whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                    activeTab === 'swap' && isAllowedSwapper
+                    activeTab === 'swap'
                       ? 'bg-blue-600 text-white'
-                      : !isAllowedSwapper
-                      ? 'cursor-not-allowed text-slate-500'
                       : 'text-slate-300 hover:bg-slate-700'
                   }`}
-                  title={!isAllowedSwapper ? 'Only allowed swapper can access' : ''}
                 >
-                  Swap {!isAllowedSwapper && '🔒'}
+                  Swap
                 </button>
                 <button
                   onClick={() => setActiveTab('info')}
@@ -100,20 +96,7 @@ export default function Home() {
                 {activeTab === 'create' && <CreatePool />}
                 {activeTab === 'add' && <AddLiquidity />}
                 {activeTab === 'remove' && <RemoveLiquidity />}
-                {activeTab === 'swap' && (
-                  isAllowedSwapper ? (
-                    <SwapTokens />
-                  ) : (
-                    <div className="py-12 text-center">
-                      <div className="mb-4 text-5xl">❌</div>
-                      <h3 className="mb-2 text-xl font-semibold text-white">Unauthorized</h3>
-                      <p className="text-slate-400">You are not the allowed swapper.</p>
-                      <p className="mt-2 text-sm text-slate-500">
-                        Connected: {connectedWallet?.slice(0, 8)}...
-                      </p>
-                    </div>
-                  )
-                )}
+                {activeTab === 'swap' && <SwapTokens />}
                 {activeTab === 'info' && <PoolInfo />}
               </div>
             </div>
