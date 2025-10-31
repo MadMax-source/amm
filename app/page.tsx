@@ -12,9 +12,7 @@ import CustomConnectButton from '@/components/CustomConnectButton';
 export default function Home() {
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [allowedSwapper] = useState<string>('ALLOWED_SWAP_PUBKEY_HERE');
-  const [activeTab, setActiveTab] = useState<'create' | 'add' | 'remove' | 'swap' | 'info'>(
-    'create',
-  );
+  const [activeTab, setActiveTab] = useState<'create' | 'add' | 'remove' | 'swap' | 'info'>('swap');
 
   const isAllowedSwapper = connectedWallet === allowedSwapper;
 
@@ -140,7 +138,7 @@ export default function Home() {
               </div>
 
               <div className="rounded-lg bg-slate-800/50 p-4 backdrop-blur-sm sm:p-6">
-                {activeTab === 'swap' && <SwapTokens />}
+                {activeTab === 'swap' && <SwapTokens connectedWallet={connectedWallet} />}
                 {activeTab === 'create' && <CreatePool />}
                 {activeTab === 'add' && <AddLiquidity />}
                 {activeTab === 'remove' && <RemoveLiquidity />}
@@ -172,7 +170,7 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="text-xs text-slate-400 sm:text-sm">Network</p>
-                    <p className="text-xs text-white sm:text-sm">Solana Devnet</p>
+                    <p className="text-xs text-white sm:text-sm">Solana Mainnet</p>
                   </div>
                 </div>
               </div>

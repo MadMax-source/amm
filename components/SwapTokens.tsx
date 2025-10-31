@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import TransactionFeedback from './TransactionFeedback';
-
+import { VersionedTransaction, PublicKey } from '@solana/web3.js';
+import { Buffer } from 'buffer';
+import { useAppKitProvider } from '@reown/appkit/react';
+import { useAppKitConnection, type Provider } from '@reown/appkit-adapter-solana/react';
 interface TokenInfo {
   id: string;
   name: string;
@@ -11,7 +14,11 @@ interface TokenInfo {
   usdPrice?: number;
 }
 
-export default function SwapTokens() {
+interface SwapTokensProps {
+  connectedWallet: string | null; // 👈 from CustomConnectButton
+}
+
+export default function SwapTokens({ connectedWallet }: SwapTokensProps) {
   const [direction, setDirection] = useState<'AtoB' | 'BtoA'>('AtoB');
   const [tokenA, setTokenA] = useState<TokenInfo | null>(null);
   const [tokenB, setTokenB] = useState<TokenInfo | null>(null);
@@ -20,12 +27,16 @@ export default function SwapTokens() {
   const [isSearchingFor, setIsSearchingFor] = useState<'A' | 'B' | null>(null);
   const [amountA, setAmountA] = useState('');
   const [estimatedOutput, setEstimatedOutput] = useState(0);
+
+  const [isSwapping, setIsSwapping] = useState(false);
   const [transaction, setTransaction] = useState<{
     signature: string;
     status: 'success' | 'error';
     message: string;
   } | null>(null);
 
+  const { connection } = useAppKitConnection();
+  const { walletProvider } = useAppKitProvider<Provider>('solana');
   // 🔎 Search tokens from Jupiter API
   useEffect(() => {
     const fetchTokens = async () => {
@@ -58,7 +69,6 @@ export default function SwapTokens() {
     return () => clearTimeout(timeout);
   }, [searchTerm]);
 
-  // 💰 Estimate output
   useEffect(() => {
     if (amountA && tokenA?.usdPrice && tokenB?.usdPrice) {
       const output = (parseFloat(amountA) * tokenA.usdPrice) / tokenB.usdPrice;
@@ -68,7 +78,6 @@ export default function SwapTokens() {
     }
   }, [amountA, tokenA, tokenB]);
 
-  // 🔄 Swap direction and token states
   const handleSwapDirection = () => {
     setDirection(direction === 'AtoB' ? 'BtoA' : 'AtoB');
     const temp = tokenA;
@@ -98,13 +107,84 @@ export default function SwapTokens() {
     });
     setAmountA('');
   };
+  // swap instruction
+
+  const handleSwap = async () => {
+    if (!walletProvider || !connectedWallet || !tokenA || !tokenB || !amountA) {
+      alert('Please connect wallet and select tokens.');
+      return;
+    }
+
+    try {
+      setIsSwapping(true);
+
+      const inputAmount = parseFloat(amountA);
+      if (isNaN(inputAmount) || inputAmount <= 0) throw new Error('Invalid amount');
+
+      // Jupiter requires amount in smallest unit (e.g., lamports)
+      const amountInSmallestUnit = Math.floor(inputAmount * 1e9);
+
+      // 1️⃣ Get quote
+      const quoteUrl = `https://lite-api.jup.ag/swap/v1/quote?inputMint=${tokenA.id}&outputMint=${tokenB.id}&amount=${amountInSmallestUnit}&slippageBps=50`;
+      const quoteResponse = await (await fetch(quoteUrl)).json();
+
+      if (!quoteResponse || !quoteResponse.routePlan) throw new Error('No quote found');
+
+      // 2️⃣ Request serialized transaction
+      const swapRes = await fetch('https://lite-api.jup.ag/swap/v1/swap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userPublicKey: connectedWallet,
+          quoteResponse,
+          wrapAndUnwrapSol: true,
+        }),
+      });
+      const swapResponse = await swapRes.json();
+
+      if (!swapResponse.swapTransaction) throw new Error('Swap transaction not returned');
+
+      // 3️⃣ Deserialize Jupiter transaction
+      const swapTxBuf = Buffer.from(swapResponse.swapTransaction, 'base64');
+      const transaction = VersionedTransaction.deserialize(swapTxBuf);
+
+      // 4️⃣ Ask Reown wallet to sign + send
+      const sig = await walletProvider.signAndSendTransaction(transaction);
+
+      // 5️⃣ Wait for confirmation
+      if (!connection) throw new Error('Connection not established');
+      await connection.confirmTransaction(sig, 'confirmed');
+
+      setTransaction({
+        signature: sig,
+        status: 'success',
+        message: `Swap Successful!\n\nYou swapped ${amountA} ${
+          tokenA.symbol
+        } for approximately ${estimatedOutput.toFixed(4)} ${tokenB.symbol}.`,
+      });
+    } catch (err: any) {
+      console.error('Swap failed:', err);
+      setTransaction({
+        signature: '',
+        status: 'error',
+        message: err.message || 'Swap failed. Please try again.',
+      });
+    } finally {
+      setIsSwapping(false);
+    }
+  };
 
   return (
     <div>
       <h2 className="mb-4 text-xl font-bold text-white sm:mb-6 sm:text-2xl">Swap Tokens</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* TOKEN A SELECT */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSwap();
+        }}
+        className="space-y-5"
+      >
         <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4 relative">
           <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             {direction === 'AtoB' ? 'From Token' : 'To Token'}
@@ -143,7 +223,6 @@ export default function SwapTokens() {
           )}
         </div>
 
-        {/* SWAP DIRECTION BUTTON */}
         <div className="flex justify-center">
           <button
             type="button"
@@ -166,7 +245,6 @@ export default function SwapTokens() {
           </button>
         </div>
 
-        {/* TOKEN B SELECT */}
         <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4 relative">
           <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
             {direction === 'AtoB' ? 'To Token' : 'From Token'}
@@ -204,8 +282,6 @@ export default function SwapTokens() {
             </button>
           )}
         </div>
-
-        {/* AMOUNT INPUT */}
         <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4 space-y-2">
           <label className="block text-xs font-medium text-slate-300 sm:text-sm">
             Amount to Swap ({tokenA?.symbol || 'Token A'})
@@ -223,21 +299,19 @@ export default function SwapTokens() {
             </p>
           )}
         </div>
-
         <button
           type="submit"
-          disabled={!tokenA || !tokenB || !amountA}
+          disabled={!tokenA || !tokenB || !amountA || !connectedWallet || isSwapping}
           className={`w-full rounded-lg py-2.5 text-sm font-medium text-white sm:py-3 sm:text-base transition-colors ${
-            !tokenA || !tokenB || !amountA
+            !tokenA || !tokenB || !amountA || !connectedWallet
               ? 'bg-slate-600 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          Swap
+          {isSwapping ? 'Swapping...' : 'Swap'}
         </button>
       </form>
 
-      {/* SEARCH DROPDOWN */}
       {isSearchingFor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-slate-800 w-11/12 max-w-md rounded-xl p-4">
@@ -295,27 +369,27 @@ export default function SwapTokens() {
 }
 
 /*
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import TransactionFeedback from './TransactionFeedback';
 
+interface TokenInfo {
+  id: string;
+  name: string;
+  symbol: string;
+  icon: string;
+  usdPrice?: number;
+}
+
+
 export default function SwapTokens() {
   const [direction, setDirection] = useState<'AtoB' | 'BtoA'>('AtoB');
-  const [tokenAAddress, setTokenAAddress] = useState('');
-  const [tokenBAddress, setTokenBAddress] = useState('');
-  const [tokenAInfo, setTokenAInfo] = useState<{
-    name: string;
-    symbol: string;
-    price: number;
-  } | null>(null);
-  const [tokenBInfo, setTokenBInfo] = useState<{
-    name: string;
-    symbol: string;
-    price: number;
-  } | null>(null);
+  const [tokenA, setTokenA] = useState<TokenInfo | null>(null);
+  const [tokenB, setTokenB] = useState<TokenInfo | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<TokenInfo[]>([]);
+  const [isSearchingFor, setIsSearchingFor] = useState<'A' | 'B' | null>(null);
   const [amountA, setAmountA] = useState('');
   const [estimatedOutput, setEstimatedOutput] = useState(0);
   const [transaction, setTransaction] = useState<{
@@ -324,67 +398,73 @@ export default function SwapTokens() {
     message: string;
   } | null>(null);
 
-  // Mock token info fetch (you can replace with real API later)
-  const mockFetchTokenInfo = async (address: string) => {
-    if (!address) return null;
-    const symbols = ['SOL', 'USDC', 'BONK', 'SRM', 'RAY'];
-    const names = ['Solana', 'USD Coin', 'Bonk', 'Serum', 'Raydium'];
-    const idx = Math.floor(Math.random() * symbols.length);
-    return {
-      name: names[idx],
-      symbol: symbols[idx],
-      price: parseFloat((Math.random() * 100).toFixed(2)),
-    };
-  };
-
-  // Handle address entry — fetch mock token info
+  // 🔎 Search tokens from Jupiter API
   useEffect(() => {
     const fetchTokens = async () => {
-      if (tokenAAddress) {
-        const info = await mockFetchTokenInfo(tokenAAddress);
-        setTokenAInfo(info);
-      } else setTokenAInfo(null);
-      if (tokenBAddress) {
-        const info = await mockFetchTokenInfo(tokenBAddress);
-        setTokenBInfo(info);
-      } else setTokenBInfo(null);
+      if (!searchTerm.trim()) {
+        setSearchResults([]);
+        return;
+      }
+      try {
+        const res = await fetch(
+          `https://lite-api.jup.ag/ultra/v1/search?query=${encodeURIComponent(searchTerm)}`,
+        );
+        const data = await res.json();
+        const tokens = Array.isArray(data)
+          ? data.map((t: any) => ({
+              id: t.id,
+              name: t.name,
+              symbol: t.symbol,
+              icon: t.icon,
+              usdPrice: t.usdPrice,
+            }))
+          : [];
+        setSearchResults(tokens);
+      } catch (err) {
+        console.error('Error fetching tokens:', err);
+        setSearchResults([]);
+      }
     };
-    fetchTokens();
-  }, [tokenAAddress, tokenBAddress]);
 
-  // Estimate output dynamically (mock formula)
+    const timeout = setTimeout(fetchTokens, 400); // debounce
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
+
   useEffect(() => {
-    if (amountA && tokenAInfo && tokenBInfo) {
-      const output = (parseFloat(amountA) * tokenAInfo.price) / tokenBInfo.price;
+    if (amountA && tokenA?.usdPrice && tokenB?.usdPrice) {
+      const output = (parseFloat(amountA) * tokenA.usdPrice) / tokenB.usdPrice;
       setEstimatedOutput(output);
     } else {
       setEstimatedOutput(0);
     }
-  }, [amountA, tokenAInfo, tokenBInfo]);
+  }, [amountA, tokenA, tokenB]);
 
-  // Swap direction logic
   const handleSwapDirection = () => {
     setDirection(direction === 'AtoB' ? 'BtoA' : 'AtoB');
-    // Swap token states
-    const tempAddress = tokenAAddress;
-    const tempInfo = tokenAInfo;
-    setTokenAAddress(tokenBAddress);
-    setTokenAInfo(tokenBInfo);
-    setTokenBAddress(tempAddress);
-    setTokenBInfo(tempInfo);
+    const temp = tokenA;
+    setTokenA(tokenB);
+    setTokenB(temp);
     setAmountA('');
     setEstimatedOutput(0);
   };
 
+  const handleSelectToken = (token: TokenInfo) => {
+    if (isSearchingFor === 'A') setTokenA(token);
+    else if (isSearchingFor === 'B') setTokenB(token);
+    setSearchResults([]);
+    setSearchTerm('');
+    setIsSearchingFor(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const mockSignature = Math.random().toString(36).substring(2, 15);
+    const mockSig = Math.random().toString(36).substring(2, 15);
     setTransaction({
-      signature: mockSignature,
+      signature: mockSig,
       status: 'success',
       message: `Swap Successful!\n\nYou swapped ${amountA} ${
-        tokenAInfo?.symbol
-      } for approximately ${estimatedOutput.toFixed(4)} ${tokenBInfo?.symbol}.`,
+        tokenA?.symbol
+      } for approximately ${estimatedOutput.toFixed(4)} ${tokenB?.symbol}.`,
     });
     setAmountA('');
   };
@@ -394,25 +474,41 @@ export default function SwapTokens() {
       <h2 className="mb-4 text-xl font-bold text-white sm:mb-6 sm:text-2xl">Swap Tokens</h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-       
-        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4 relative">
           <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
-            {direction === 'AtoB' ? 'Token A Address' : 'Token B Address'}
+            {direction === 'AtoB' ? 'From Token' : 'To Token'}
           </label>
-          <input
-            type="text"
-            value={tokenAAddress}
-            onChange={(e) => setTokenAAddress(e.target.value)}
-            placeholder="Enter token address..."
-            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
-          />
-          {tokenAInfo && (
-            <div className="mt-2 text-xs text-slate-300 sm:text-sm">
-              <p>
-                <strong>{tokenAInfo.name}</strong> ({tokenAInfo.symbol})
-              </p>
-              <p className="text-slate-400">Price: ${tokenAInfo.price}</p>
+
+          {tokenA ? (
+            <div
+              className="flex items-center justify-between rounded-lg bg-slate-800 p-2 cursor-pointer hover:bg-slate-700"
+              onClick={() => {
+                setIsSearchingFor('A');
+                setSearchTerm('');
+              }}
+            >
+              <div className="flex items-center space-x-3">
+                <img src={tokenA.icon} alt={tokenA.symbol} className="h-6 w-6 rounded-full" />
+                <div>
+                  <p className="text-white text-sm font-medium">{tokenA.name}</p>
+                  <p className="text-xs text-slate-400">
+                    {tokenA.symbol} • {tokenA.id.slice(0, 4)}...{tokenA.id.slice(-4)}
+                  </p>
+                </div>
+              </div>
+              <span className="text-slate-400 text-xs">${tokenA.usdPrice?.toFixed(3)}</span>
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setIsSearchingFor('A');
+                setSearchTerm('');
+              }}
+              className="w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Select Token A
+            </button>
           )}
         </div>
 
@@ -438,30 +534,46 @@ export default function SwapTokens() {
           </button>
         </div>
 
-        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4">
+        <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4 relative">
           <label className="mb-2 block text-xs font-medium text-slate-300 sm:text-sm">
-            {direction === 'AtoB' ? 'Token B Address' : 'Token A Address'}
+            {direction === 'AtoB' ? 'To Token' : 'From Token'}
           </label>
-          <input
-            type="text"
-            value={tokenBAddress}
-            onChange={(e) => setTokenBAddress(e.target.value)}
-            placeholder="Enter token address..."
-            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:px-4"
-          />
-          {tokenBInfo && (
-            <div className="mt-2 text-xs text-slate-300 sm:text-sm">
-              <p>
-                <strong>{tokenBInfo.name}</strong> ({tokenBInfo.symbol})
-              </p>
-              <p className="text-slate-400">Price: ${tokenBInfo.price}</p>
+
+          {tokenB ? (
+            <div
+              className="flex items-center justify-between rounded-lg bg-slate-800 p-2 cursor-pointer hover:bg-slate-700"
+              onClick={() => {
+                setIsSearchingFor('B');
+                setSearchTerm('');
+              }}
+            >
+              <div className="flex items-center space-x-3">
+                <img src={tokenB.icon} alt={tokenB.symbol} className="h-6 w-6 rounded-full" />
+                <div>
+                  <p className="text-white text-sm font-medium">{tokenB.name}</p>
+                  <p className="text-xs text-slate-400">
+                    {tokenB.symbol} • {tokenB.id.slice(0, 4)}...{tokenB.id.slice(-4)}
+                  </p>
+                </div>
+              </div>
+              <span className="text-slate-400 text-xs">${tokenB.usdPrice?.toFixed(3)}</span>
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setIsSearchingFor('B');
+                setSearchTerm('');
+              }}
+              className="w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Select Token B
+            </button>
           )}
         </div>
-
         <div className="rounded-lg bg-slate-700/50 p-3 sm:p-4 space-y-2">
           <label className="block text-xs font-medium text-slate-300 sm:text-sm">
-            Amount to Swap ({tokenAInfo?.symbol || 'Token A'})
+            Amount to Swap ({tokenA?.symbol || 'Token A'})
           </label>
           <input
             type="number"
@@ -472,16 +584,16 @@ export default function SwapTokens() {
           />
           {estimatedOutput > 0 && (
             <p className="text-xs text-slate-400 sm:text-sm">
-              ≈ {estimatedOutput.toFixed(4)} {tokenBInfo?.symbol || 'Token B'}
+              ≈ {estimatedOutput.toFixed(4)} {tokenB?.symbol || 'Token B'}
             </p>
           )}
         </div>
 
         <button
           type="submit"
-          disabled={!tokenAInfo || !tokenBInfo || !amountA}
+          disabled={!tokenA || !tokenB || !amountA}
           className={`w-full rounded-lg py-2.5 text-sm font-medium text-white sm:py-3 sm:text-base transition-colors ${
-            !tokenAInfo || !tokenBInfo || !amountA
+            !tokenA || !tokenB || !amountA
               ? 'bg-slate-600 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
@@ -490,12 +602,60 @@ export default function SwapTokens() {
         </button>
       </form>
 
+      {isSearchingFor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-slate-800 w-11/12 max-w-md rounded-xl p-4">
+            <h3 className="text-white text-lg font-semibold mb-3">Search Token {isSearchingFor}</h3>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name, symbol, or address..."
+              className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="mt-3 max-h-64 overflow-y-auto">
+              {searchResults.length === 0 ? (
+                <p className="text-center text-slate-400 text-sm py-3">
+                  {searchTerm ? 'Searching...' : 'Type to search tokens'}
+                </p>
+              ) : (
+                searchResults.map((token) => (
+                  <div
+                    key={token.id}
+                    onClick={() => handleSelectToken(token)}
+                    className="flex items-center justify-between p-2 hover:bg-slate-700 rounded-lg cursor-pointer"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <img src={token.icon} alt={token.symbol} className="h-6 w-6 rounded-full" />
+                      <div>
+                        <p className="text-white text-sm font-medium">{token.name}</p>
+                        <p className="text-xs text-slate-400">
+                          {token.symbol} • {token.id.slice(0, 4)}...{token.id.slice(-4)}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-slate-400 text-xs">
+                      ${token.usdPrice?.toFixed(3) || '-'}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+            <button
+              onClick={() => setIsSearchingFor(null)}
+              className="mt-4 w-full rounded-lg bg-slate-700 py-2 text-sm font-medium text-white hover:bg-slate-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {transaction && (
         <TransactionFeedback transaction={transaction} onClose={() => setTransaction(null)} />
       )}
     </div>
   );
 }
-
 
 */
